@@ -1,3 +1,5 @@
+import { supabase } from './supabase.js'
+
 // DOM Elements
 const addTodoFormDialog = document.getElementById('add_todo_form_dialog')
 const openAddTodoFormBtn = document.getElementById('open_add_todo_form_btn')
@@ -15,6 +17,7 @@ const actionMessageIcon = document.getElementById('action_message_icon')
 
 
 // EVENT LISTENERS //
+document.addEventListener('DOMContentLoaded', fetchTodos())
 openAddTodoFormBtn.addEventListener('click', openAddTodoFormDialog)
 submitAddTodoBtn.addEventListener('click', (e) => submitAddTodoForm(e))
 updateTodoInputForm.addEventListener('submit', (e) => submitUpdateTodoForm(e))
@@ -57,24 +60,25 @@ function submitUpdateTodoForm(e)
 }
 
 
-
-
-
 // Determine Todo Action (Complete, Update, Delete)
 let currentTodoItem
 function determineTodoAction(e)
 {
-    if (e.target.matches('.complete-todo-btn')) {
+    if (e.target.matches('.complete-todo-btn'))
+    {
         completeTodo(e)
     }
-    else if (e.target.matches('.update-todo-btn')) {
+    else if (e.target.matches('.update-todo-btn'))
+    {
         currentTodoItem = e.target.closest('.todo-list-item')
         const currentText = currentTodoItem.querySelector('.todo-text').textContent
         updateTodoInput.value = currentText
         updateTodoFormDialog.showModal()
     }
-    else if (e.target.matches('.delete-todo-btn')) {
-        deleteTodo(e)
+    else if (e.target.matches('.delete-todo-btn'))
+    {
+        const todoId = e.target.closest('.todo-list-item').dataset.todoId
+        deleteTodo(e, { id: todoId })
     }
 }
 
@@ -125,7 +129,7 @@ function updateTodoData()
 
         // Remove the 'completed' class if it exists
         currentTodoItem.querySelector('.todo-text').classList.remove('completed');
-        
+
         // Show the updated message
         showUpdatedMessage()
     }
@@ -145,13 +149,54 @@ function showUpdatedMessage()
 
 
 // Delete Todo
-function deleteTodo(e)
+async function deleteTodo(e, todo)
 {
-    const isWantingToDeleteTodo = confirm('Do you want to delete the todo?')
+    console.log(todo.id)
 
-    if (isWantingToDeleteTodo && confirm('Are you really sure you want to delete the todo? It cannot be undone!')) {
-        e.target.closest('.todo-list-item').remove()
-        showDeletedMessage()
+    if (!todo || !todo.id)
+    {
+        console.error('Invalid todo object or ID is missing.');
+        return;
+    }
+
+    confirmTodoDeletion()
+
+    try
+    {
+        const { error } = await supabase
+            .from('todo_app')
+            .delete()
+            .eq('id', todo.id);
+
+        if (error)
+        {
+            console.error('Error deleting todo:', error.message);
+            return;
+        }
+
+        showDeletedMessage();
+    }
+    catch (error)
+    {
+        console.log('Error deleting todo:', error.message);
+    }
+
+}
+
+function confirmTodoDeletion()
+{
+    const isWantingToDeleteTodo = confirm('Do you want to delete the todo?');
+
+    if (!isWantingToDeleteTodo)
+    {
+        return;
+    }
+
+    const isReallyWantingToDeleteTodo = confirm('Are you absolutely sure you want to delete the todo?');
+
+    if (!isReallyWantingToDeleteTodo)
+    {
+        return;
     }
 }
 
@@ -169,13 +214,43 @@ function showDeletedMessage()
 }
 
 
+// Fetch todos from Supabase
+async function fetchTodos()
+{
+    try
+    {
+        const { data: todos, error } = await supabase
+            .from('todo_app')
+            .select('todo_text')
+
+        if (error)
+        {
+            console.log('Error fetching todos: ', error.message)
+            return
+        }
+
+        // Clear existing todos
+        todoListContainer.innerHTML = ''
+
+        todos.forEach((todo) =>
+        {
+            createTodoListItem(todo)
+            console.log(todo)
+        })
+    }
+    catch (error)
+    {
+        console.log('Unexpected error: ', error.message)
+    }
+}
+
 // --- Todo Item Creation ---
 // Create Todo List Item
-function createTodoListItem()
+function createTodoListItem(todo)
 {
-    const todoLI = createTodoLI('todo-list-item')
-    const todoSpan = createTodoSpan('todo-text')
-    const todoControlButtonsContainer = createTodoControlButtonsContainer('container todo-list-controls-buttons-container')
+    const todoLI = createTodoLI('todo-list-item', todo)
+    const todoSpan = createTodoSpan('todo-text', todo)
+    const todoControlButtonsContainer = createTodoControlButtonsContainer('container todo-list-controls-buttons-container', todo)
     const completeTodoBtn = createCompleteTodoControlButton()
     const completeTodoBtnIcon = createCompleteTodoControlButtonIcon()
     const updateTodoBtn = createUpdateTodoControlButton()
@@ -195,18 +270,19 @@ function createTodoListItem()
 }
 
 // Create Todo LI
-function createTodoLI(todoLIClasses)
+function createTodoLI(todoLIClasses, todo)
 {
-    const todoLI = document.createElement('li')
-    todoLI.classList = todoLIClasses
-    return todoLI
+    const todoLI = document.createElement('li');
+    todoLI.classList = todoLIClasses;
+    todoLI.dataset.todoId = todo.id; // Correctly assign the ID to the li element
+    return todoLI;
 }
 
 // Create Todo Text
-function createTodoSpan(todoSpanClasses)
+function createTodoSpan(todoSpanClasses, todo)
 {
     const todoTextSpan = document.createElement('span')
-    todoTextSpan.textContent = getFormData()
+    todoTextSpan.textContent = todo.todo_text
     todoTextSpan.classList = todoSpanClasses
     return todoTextSpan
 }
@@ -290,13 +366,36 @@ function getFormData()
 }
 
 // Create Todo
-function createTodo()
+/*
+
+*/
+async function createTodo()
 {
     const todoText = getFormData()
 
-    if (todoText) {
-        createTodoListItem(todoText)
-        addTodoInputForm.reset()
+    if (todoText)
+    {
+        try
+        {
+            const { data, error } = await supabase
+                .from('todo_app')
+                .insert([{ todo_text: todoText }])
+
+            if (error)
+            {
+                console.error('Error adding todo:', error.message)
+                return
+            }
+            addTodoInputForm.reset()
+        }
+        catch (err)
+        {
+            console.error('Unexpected error:', err.message)
+        }
+
+
+        // createTodoListItem(todoText)
+
     }
 
     closeAddTodoFormDialog()
