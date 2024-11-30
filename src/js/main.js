@@ -17,6 +17,7 @@ const actionMessageIcon = document.getElementById('action_message_icon')
 
 
 // EVENT LISTENERS //
+document.addEventListener('DOMContentLoaded', fetchTodos())
 openAddTodoFormBtn.addEventListener('click', openAddTodoFormDialog)
 submitAddTodoBtn.addEventListener('click', (e) => submitAddTodoForm(e))
 updateTodoInputForm.addEventListener('submit', (e) => submitUpdateTodoForm(e))
@@ -170,13 +171,43 @@ function showDeletedMessage()
 }
 
 
+// Fetch todos from Supabase
+async function fetchTodos()
+{
+    try
+    {
+        const { data: todos, error } = await supabase    
+            .from('todo_app')
+            .select('todo_text')
+        
+        if(error)
+        {
+            console.log('Error fetching todos: ', error.message)
+            return
+        }
+
+        // Clear existing todos
+        todoListContainer.innerHTML = ''
+
+        todos.forEach((todo) =>
+        {
+            createTodoListItem(todo)
+            console.log(todo)
+        })
+    }
+    catch (error)
+    {
+        console.log('Unexpected error: ', error.message)
+    }
+}
+
 // --- Todo Item Creation ---
 // Create Todo List Item
-function createTodoListItem()
+function createTodoListItem(todo)
 {
-    const todoLI = createTodoLI('todo-list-item')
-    const todoSpan = createTodoSpan('todo-text')
-    const todoControlButtonsContainer = createTodoControlButtonsContainer('container todo-list-controls-buttons-container')
+    const todoLI = createTodoLI('todo-list-item', todo)
+    const todoSpan = createTodoSpan('todo-text', todo)
+    const todoControlButtonsContainer = createTodoControlButtonsContainer('container todo-list-controls-buttons-container', todo)
     const completeTodoBtn = createCompleteTodoControlButton()
     const completeTodoBtnIcon = createCompleteTodoControlButtonIcon()
     const updateTodoBtn = createUpdateTodoControlButton()
@@ -196,18 +227,19 @@ function createTodoListItem()
 }
 
 // Create Todo LI
-function createTodoLI(todoLIClasses)
+function createTodoLI(todoLIClasses, todo)
 {
     const todoLI = document.createElement('li')
     todoLI.classList = todoLIClasses
+    todoListContainer.dataset.todoId = todo.id
     return todoLI
 }
 
 // Create Todo Text
-function createTodoSpan(todoSpanClasses)
+function createTodoSpan(todoSpanClasses, todo)
 {
     const todoTextSpan = document.createElement('span')
-    todoTextSpan.textContent = getFormData()
+    todoTextSpan.textContent = todo.todo_text
     todoTextSpan.classList = todoSpanClasses
     return todoTextSpan
 }
