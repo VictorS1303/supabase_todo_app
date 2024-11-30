@@ -1,3 +1,5 @@
+import { supabase } from './supabase.js'
+
 // DOM Elements
 const addTodoFormDialog = document.getElementById('add_todo_form_dialog')
 const openAddTodoFormBtn = document.getElementById('open_add_todo_form_btn')
@@ -118,14 +120,13 @@ function updateTodoData()
     // Get the value of the input field with the name "update_todo_input"
     const updateInputData = formData.get('update_todo_input')
 
-    if (currentTodoItem)
-    {
+    if (currentTodoItem) {
         // Update the todo text
         currentTodoItem.querySelector('.todo-text').textContent = updateInputData
 
         // Remove the 'completed' class if it exists
         currentTodoItem.querySelector('.todo-text').classList.remove('completed');
-        
+
         // Show the updated message
         showUpdatedMessage()
     }
@@ -290,13 +291,36 @@ function getFormData()
 }
 
 // Create Todo
-function createTodo()
+/*
+
+*/ 
+async function createTodo()
 {
     const todoText = getFormData()
 
-    if (todoText) {
-        createTodoListItem(todoText)
-        addTodoInputForm.reset()
+    if (todoText)
+    {
+        try
+        {
+            const { data, error } = await supabase
+                .from('todo_app')
+                .insert([{todo_text: todoText}])
+
+            if (error)
+            {
+                console.error('Error adding todo:', error.message)
+                return
+            }
+            addTodoInputForm.reset()
+        }
+        catch (err)
+        {
+            console.error('Unexpected error:', err.message)
+        }
+
+
+        // createTodoListItem(todoText)
+        
     }
 
     closeAddTodoFormDialog()
