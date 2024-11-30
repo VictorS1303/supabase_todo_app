@@ -60,24 +60,25 @@ function submitUpdateTodoForm(e)
 }
 
 
-
-
-
 // Determine Todo Action (Complete, Update, Delete)
 let currentTodoItem
 function determineTodoAction(e)
 {
-    if (e.target.matches('.complete-todo-btn')) {
+    if (e.target.matches('.complete-todo-btn'))
+    {
         completeTodo(e)
     }
-    else if (e.target.matches('.update-todo-btn')) {
+    else if (e.target.matches('.update-todo-btn'))
+    {
         currentTodoItem = e.target.closest('.todo-list-item')
         const currentText = currentTodoItem.querySelector('.todo-text').textContent
         updateTodoInput.value = currentText
         updateTodoFormDialog.showModal()
     }
-    else if (e.target.matches('.delete-todo-btn')) {
-        deleteTodo(e)
+    else if (e.target.matches('.delete-todo-btn'))
+    {
+        const todoId = e.target.closest('.todo-list-item').dataset.todoId
+        deleteTodo(e, { id: todoId })
     }
 }
 
@@ -121,7 +122,8 @@ function updateTodoData()
     // Get the value of the input field with the name "update_todo_input"
     const updateInputData = formData.get('update_todo_input')
 
-    if (currentTodoItem) {
+    if (currentTodoItem)
+    {
         // Update the todo text
         currentTodoItem.querySelector('.todo-text').textContent = updateInputData
 
@@ -147,13 +149,54 @@ function showUpdatedMessage()
 
 
 // Delete Todo
-function deleteTodo(e)
+async function deleteTodo(e, todo)
 {
-    const isWantingToDeleteTodo = confirm('Do you want to delete the todo?')
+    console.log(todo.id)
 
-    if (isWantingToDeleteTodo && confirm('Are you really sure you want to delete the todo? It cannot be undone!')) {
-        e.target.closest('.todo-list-item').remove()
-        showDeletedMessage()
+    if (!todo || !todo.id)
+    {
+        console.error('Invalid todo object or ID is missing.');
+        return;
+    }
+
+    confirmTodoDeletion()
+
+    try
+    {
+        const { error } = await supabase
+            .from('todo_app')
+            .delete()
+            .eq('id', todo.id);
+
+        if (error)
+        {
+            console.error('Error deleting todo:', error.message);
+            return;
+        }
+
+        showDeletedMessage();
+    }
+    catch (error)
+    {
+        console.log('Error deleting todo:', error.message);
+    }
+
+}
+
+function confirmTodoDeletion()
+{
+    const isWantingToDeleteTodo = confirm('Do you want to delete the todo?');
+
+    if (!isWantingToDeleteTodo)
+    {
+        return;
+    }
+
+    const isReallyWantingToDeleteTodo = confirm('Are you absolutely sure you want to delete the todo?');
+
+    if (!isReallyWantingToDeleteTodo)
+    {
+        return;
     }
 }
 
@@ -176,11 +219,11 @@ async function fetchTodos()
 {
     try
     {
-        const { data: todos, error } = await supabase    
+        const { data: todos, error } = await supabase
             .from('todo_app')
             .select('todo_text')
-        
-        if(error)
+
+        if (error)
         {
             console.log('Error fetching todos: ', error.message)
             return
@@ -229,10 +272,10 @@ function createTodoListItem(todo)
 // Create Todo LI
 function createTodoLI(todoLIClasses, todo)
 {
-    const todoLI = document.createElement('li')
-    todoLI.classList = todoLIClasses
-    todoListContainer.dataset.todoId = todo.id
-    return todoLI
+    const todoLI = document.createElement('li');
+    todoLI.classList = todoLIClasses;
+    todoLI.dataset.todoId = todo.id; // Correctly assign the ID to the li element
+    return todoLI;
 }
 
 // Create Todo Text
@@ -325,7 +368,7 @@ function getFormData()
 // Create Todo
 /*
 
-*/ 
+*/
 async function createTodo()
 {
     const todoText = getFormData()
@@ -336,7 +379,7 @@ async function createTodo()
         {
             const { data, error } = await supabase
                 .from('todo_app')
-                .insert([{todo_text: todoText}])
+                .insert([{ todo_text: todoText }])
 
             if (error)
             {
@@ -352,7 +395,7 @@ async function createTodo()
 
 
         // createTodoListItem(todoText)
-        
+
     }
 
     closeAddTodoFormDialog()
