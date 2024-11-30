@@ -1,0 +1,80 @@
+
+
+/* Todo List */
+section.todo-list-section
+{
+    height: 400px;
+    width: 30vw;
+    max-width: 500px;
+
+    & header
+    {
+        text-align: center;
+        margin-top: 50px;
+        color: var(--primary-text-color);
+    }
+
+    & ul
+    {
+        margin: 20px auto;
+        width: 80%;
+        height: 200px;
+        overflow: hidden;
+
+        & li
+        {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            align-items: center;
+            height: 45px;
+            background-color: #fff;
+            width: 100%;
+
+            &:not(:last-child)
+            {
+                margin-bottom: 20px;
+            }
+
+            & span
+            {
+                margin-left: 15px;
+                white-space: no-wrap;
+            }
+
+            & div
+            {
+                display: flex;
+                height: 100%;
+
+                & button
+                {
+                    height: 100%;
+                    width: 40px;
+                    box-shadow: none;
+
+                    & i
+                    {
+                        pointer-events: none;
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+/* Open Add Todo Form Button */
+.open-add-todo-form-btn
+{
+    position: absolute;
+    right: 40px;
+    bottom: 40px;
+    font-size: 2rem;
+    color: var(--primary-text-color);
+    background-color: var(--open-form-btn-background-color);
+    height: 60px;
+    width: 60px;
+    border-radius: calc(var(--base-border-radius) * 5);
+}
+

@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css?family=Ubuntu+Sans+Mono: 100, 200, 300, 400, 500, 600, 700, 800, 900');
+
+*
+{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    user-select: none;
+}
+
+:root
+{
+    /* Font Sizes */
+
+    --heading-one-font-size: clamp(2.3328rem, 2.0827rem + 1.2504vw, 3.0518rem);
+    --heading-two-font-size: clamp(1.944rem, 1.771rem + 0.8651vw, 2.4414rem);
+    --heading-three-font-size: clamp(1.62rem, 1.5041rem + 0.5793vw, 1.9531rem);
+    --heading-four-font-size: clamp(1.35rem, 1.2761rem + 0.3696vw, 1.5625rem);
+    --heading-five-font-size: clamp(1.125rem, 1.0815rem + 0.2174vw, 1.25rem);
+    --heading-six-font-size: clamp(0.8333rem, 0.7754rem + 0.2899vw, 1rem);
+    --paragraph-font-size: clamp( 0.075rem, -0.4424rem + 2.587vw, 1.5625rem);
+        
+    /* Colors */
+    --body-background-color: #7194ff;
+    --primary-text-color: #fff;
+    --open-form-btn-background-color: #3358c9;
+    --add-todo-btn-background-color: #3358c9;
+    --dialog-background-color: #7194ff;
+    --complete-todo-btn-color: #008080;
+    --update-todo-btn-color: #acac26;
+    --delete-todo-btn-color: #ff2600;
+
+    --update-dialog-background-color: #acac26;
+    --update-todo-btn-background-color: #fff;
+    --completed-text-color: #008080;
+    --completed-message-background-color: #008080;
+    --updated-message-background-color: #acac26;
+    --deleted-message-background-color: #ff2600;
+  
+    /* Radii */
+    --base-border-radius: 10px;
+
+    /* Shadows */
+    --text-shadow: 0 2px 5px rgba(0, 0, 0, .3);
+    --box-shadow: 0 2px 5px rgba(0, 0, 0, .3);
+}
+
+body
+{
+    display: grid;
+    place-content: center;
+    min-height: 100vh;
+    font-family: 'Ubuntu Sans Mono', sans-serif;
+    background-color: var(--body-background-color);
+}
+
+header
+{
+    font-family: inherit;
+}
+
+h1
+{
+    font-size: var(--heading-one-font-size);
+}
+
+h2
+{
+    font-size: var(--heading-two-font-size);
+}
+
+h3
+{
+    font-size: var(--heading-three-font-size);
+}
+
+h4
+{
+    font-size: var(--heading-four-font-size);
+}
+
+h5
+{
+    font-size: var(--heading-five-font-size);
+}
+
+h6
+{
+    font-size: var(--heading-six-font-size);
+}
+
+p
+{
+    font-family: inherit;
+    font-size: var(--paragraph-font-size);
+}
+
+a
+{
+    text-decoration: none;
+}
+
+li
+{
+    list-style: none;
+}
+
+button
+{
+    background-color: transparent;
+    white-space: nowrap;
+    cursor: pointer;
+}
