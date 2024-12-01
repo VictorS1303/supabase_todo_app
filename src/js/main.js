@@ -260,13 +260,15 @@ function createTodoListItem(todo)
 
     // Appending from outermost parent inwards
     todoListSection.appendChild(todoListContainer)
-    todoListContainer.appendChild(todoLI)
+    todoListContainer.prepend(todoLI)
     todoLI.append(todoSpan, todoControlButtonsContainer)
     todoControlButtonsContainer.append(completeTodoBtn, updateTodoBtn, deleteTodoBtn)
 
     completeTodoBtn.appendChild(completeTodoBtnIcon)
     updateTodoBtn.appendChild(updateTodoBtnIcon)
     deleteTodoBtn.appendChild(deleteTodoBtnIcon)
+
+    fetchTodos()
 }
 
 // Create Todo LI
