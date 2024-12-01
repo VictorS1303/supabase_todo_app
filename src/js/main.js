@@ -77,7 +77,8 @@ function determineTodoAction(e)
     }
     else if (e.target.matches('.delete-todo-btn'))
     {
-        const todoId = e.target.closest('.todo-list-item').dataset.todoId
+        const todoId = e.target.closest('.todo-list-item')?.dataset.todoId
+        console.log('Todo ID to delete: ' + todoId)
         deleteTodo(e, { id: todoId })
     }
 }
@@ -128,7 +129,7 @@ function updateTodoData()
         currentTodoItem.querySelector('.todo-text').textContent = updateInputData
 
         // Remove the 'completed' class if it exists
-        currentTodoItem.querySelector('.todo-text').classList.remove('completed');
+        currentTodoItem.querySelector('.todo-text').classList.remove('completed')
 
         // Show the updated message
         showUpdatedMessage()
@@ -151,52 +152,51 @@ function showUpdatedMessage()
 // Delete Todo
 async function deleteTodo(e, todo)
 {
-    console.log(todo.id)
-
     if (!todo || !todo.id)
     {
-        console.error('Invalid todo object or ID is missing.');
-        return;
+        console.error('Invalid todo object or ID is missing.')
+        return
     }
 
     confirmTodoDeletion()
 
     try
     {
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('todo_app')
             .delete()
-            .eq('id', todo.id);
+            .eq('id', todo.id)
 
         if (error)
         {
-            console.error('Error deleting todo:', error.message);
-            return;
+            console.error('Error deleting todo:', error.message)
+            return
         }
 
-        showDeletedMessage();
-    }
-    catch (error)
+        showDeletedMessage()
+        fetchTodos() // Refresh the todo list after successful deletion
+    } catch (error)
     {
-        console.log('Error deleting todo:', error.message);
+        console.error('Unexpected error deleting todo:', error.message)
     }
-
 }
+
 
 function confirmTodoDeletion()
 {
-    const isWantingToDeleteTodo = confirm('Do you want to delete the todo?');
+    // First confirmation dialog
+    const isWantingToDeleteTodo = confirm('Do you want to delete the todo?')
 
     if (!isWantingToDeleteTodo)
     {
-        return;
+        return // Exit if the user cancels
     }
 
-    const isReallyWantingToDeleteTodo = confirm('Are you absolutely sure you want to delete the todo?');
-
+    // Second confirmation dialog
+    const isReallyWantingToDeleteTodo = confirm('Are you absolutely sure you want to delete the todo?')
     if (!isReallyWantingToDeleteTodo)
     {
-        return;
+        return // Exit if the user cancels
     }
 }
 
@@ -221,7 +221,7 @@ async function fetchTodos()
     {
         const { data: todos, error } = await supabase
             .from('todo_app')
-            .select('todo_text')
+            .select('id, todo_text')
 
         if (error)
         {
@@ -272,10 +272,11 @@ function createTodoListItem(todo)
 // Create Todo LI
 function createTodoLI(todoLIClasses, todo)
 {
-    const todoLI = document.createElement('li');
-    todoLI.classList = todoLIClasses;
-    todoLI.dataset.todoId = todo.id; // Correctly assign the ID to the li element
-    return todoLI;
+    const todoLI = document.createElement('li')
+    todoLI.classList = todoLIClasses
+    todoLI.dataset.todoId = todo.id // Correctly assign the ID to the li element
+    console.log(todoLI.dataset.todoId)
+    return todoLI
 }
 
 // Create Todo Text
@@ -380,6 +381,7 @@ async function createTodo()
             const { data, error } = await supabase
                 .from('todo_app')
                 .insert([{ todo_text: todoText }])
+                .select('id, todo_text')
 
             if (error)
             {
