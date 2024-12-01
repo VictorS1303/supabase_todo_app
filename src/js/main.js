@@ -267,8 +267,6 @@ function createTodoListItem(todo)
     completeTodoBtn.appendChild(completeTodoBtnIcon)
     updateTodoBtn.appendChild(updateTodoBtnIcon)
     deleteTodoBtn.appendChild(deleteTodoBtnIcon)
-
-    fetchTodos()
 }
 
 // Create Todo LI
